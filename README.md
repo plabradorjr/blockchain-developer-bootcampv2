@@ -13,5 +13,3 @@ npx hardhat run scripts/deploy.js
 ```
 
 # blockchain-developer-bootcampv2
-
-test
