@@ -1,18 +1,16 @@
-// SPDX-License-Identifier: UNLICENSED
+//SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
-
 import "./Token.sol";
 
 contract Exchange {
     address public feeAccount;
     uint256 public feePercent;
-
     mapping(address => mapping(address => uint256)) public tokens;
     mapping(uint256 => _Order) public orders;
-
     uint256 public orderCount;
+    mapping(uint256 => bool) public orderCancelled;
 
     event Deposit(address token, address user, uint256 amount, uint256 balance);
     event Withdraw(
@@ -30,10 +28,18 @@ contract Exchange {
         uint256 amountGive,
         uint256 timestamp
     );
+    event Cancel(
+        uint256 id,
+        address user,
+        address tokenGet,
+        uint256 amountGet,
+        address tokenGive,
+        uint256 amountGive,
+        uint256 timestamp
+    );
 
-    // A way to model the order
     struct _Order {
-        //  Attributes of an order
+        // Attributes of an order
         uint256 id; // Unique identifier for order
         address user; // User who made order
         address tokenGet; // Address of the token they receive
@@ -48,8 +54,9 @@ contract Exchange {
         feePercent = _feePercent;
     }
 
-    // --------------------------
-    // DEPOSIT and WITHDRAW TOKEN
+    // ------------------------
+    // DEPOSIT & WITHDRAW TOKEN
+
     function depositToken(address _token, uint256 _amount) public {
         // Transfer tokens to exchange
         require(Token(_token).transferFrom(msg.sender, address(this), _amount));
@@ -71,7 +78,7 @@ contract Exchange {
         // Update user balance
         tokens[_token][msg.sender] = tokens[_token][msg.sender] - _amount;
 
-        // Emit an event
+        // Emit event
         emit Withdraw(_token, msg.sender, _amount, tokens[_token][msg.sender]);
     }
 
@@ -83,9 +90,8 @@ contract Exchange {
         return tokens[_token][_user];
     }
 
-    // --------------------------
-    // MAKE and CANCEL ORDERS
-
+    // ------------------------
+    // MAKE & CANCEL ORDERS
     function makeOrder(
         address _tokenGet,
         uint256 _amountGet,
@@ -95,16 +101,16 @@ contract Exchange {
         // Prevent orders if tokens aren't on exchange
         require(balanceOf(_tokenGive, msg.sender) >= _amountGive);
 
-        // CREATE ORDER
+        // Instantiate a new order
         orderCount = orderCount + 1;
         orders[orderCount] = _Order(
-            orderCount, // id
-            msg.sender, // user
+            orderCount,
+            msg.sender,
             _tokenGet,
             _amountGet,
             _tokenGive,
             _amountGive,
-            block.timestamp // timestamp
+            block.timestamp
         );
 
         // Emit event
@@ -115,6 +121,31 @@ contract Exchange {
             _amountGet,
             _tokenGive,
             _amountGive,
+            block.timestamp
+        );
+    }
+
+    function cancelOrder(uint256 _id) public {
+        // Fetch order
+        _Order storage _order = orders[_id];
+
+        // Ensure the caller of the function is the owner of the order
+        require(address(_order.user) == msg.sender);
+
+        // Order must exist
+        require(_order.id == _id);
+
+        // Cancel the order
+        orderCancelled[_id] = true;
+
+        // Emit event
+        emit Cancel(
+            _order.id,
+            msg.sender,
+            _order.tokenGet,
+            _order.amountGet,
+            _order.tokenGive,
+            _order.amountGive,
             block.timestamp
         );
     }
