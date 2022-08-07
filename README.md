@@ -9,5 +9,8 @@ make sure the contract address for pengu token, mdai, meth, and exchange
 corresponds to the /src/config.json addresses. If not, then copy pasta
 the newly deployed local addy
 
+next, seed the exchange:
+`npx hardhat run --network localhost ./scripts/2_seed-exchange.js`
+
 to start react app:
 `npm run start`
