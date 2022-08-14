@@ -15,6 +15,18 @@
     "explorerURL": "#"
   },
   "42": {
+    "exchange": {
+      "address": "0xd3DB54c923D8AdB1ee5F29d7891F76c8d08c5476"
+    },
+    "PENGU": {
+      "address": "0x1897D2cCbF39e2446507a4f62D7aac9cE1e895DB"
+    },
+    "mETH": {
+      "address": "0x74b5A57f9f551C4651dA27fe20E3B216d8851D01"
+    },
+    "mDAI": {
+      "address": "0x515f848bFAB65374d03da953C1C7570399C3166d"
+    },
     "explorerURL": "https://kovan.etherscan.io/"
   }
 }
